@@ -224,42 +224,123 @@ function escapeHtml(s) {
     .replace(/"/g, '&quot;');
 }
 
-// Star background renderer
+// Star background renderer — 3-layer parallax + nebula clouds + twinkle
 class StarField {
-  constructor(count = 300) {
+  constructor(count = 400) {
+    // Star colors: mostly white, some tinted blue/orange/yellow
     this.layers = [
-      { stars: this._gen(count * 0.5, 0.2), speed: 0.05 },  // Far
-      { stars: this._gen(count * 0.3, 0.5), speed: 0.2 },   // Mid
-      { stars: this._gen(count * 0.2, 1.0), speed: 0.5 },   // Near
+      { stars: this._gen(count * 0.55, 0.18, 0.8),  speed: 0.04 },  // Far, tiny
+      { stars: this._gen(count * 0.30, 0.45, 1.2),  speed: 0.18 },  // Mid
+      { stars: this._gen(count * 0.15, 0.85, 1.8),  speed: 0.45 },  // Near, bright
     ];
+    this.nebulae = this._genNebulae(6);
+    this._t = 0;
   }
 
-  _gen(count, brightness) {
+  _gen(count, brightness, maxR) {
+    const tints = [
+      [255,255,255], [200,220,255], [255,230,200], [220,255,255],
+      [255,255,220], [200,200,255],
+    ];
     const stars = [];
     for (let i = 0; i < count; i++) {
+      const tint = tints[Math.floor(Math.random() * tints.length)];
       stars.push({
         x: Math.random(),
         y: Math.random(),
-        r: Math.random() * 1.5 + 0.5,
-        b: brightness * (0.5 + Math.random() * 0.5),
+        r: Math.random() * maxR + 0.4,
+        b: brightness * (0.4 + Math.random() * 0.6),
+        twinkle: Math.random() < 0.2,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 1.5,
+        tint,
       });
     }
     return stars;
   }
 
+  _genNebulae(count) {
+    const colors = [
+      [30, 10, 80],   // purple
+      [0, 20, 60],    // deep blue
+      [60, 10, 30],   // dark red
+      [0, 40, 50],    // teal
+    ];
+    const n = [];
+    for (let i = 0; i < count; i++) {
+      const c = colors[Math.floor(Math.random() * colors.length)];
+      n.push({
+        x: Math.random(),
+        y: Math.random(),
+        rx: 0.15 + Math.random() * 0.25,
+        ry: 0.08 + Math.random() * 0.18,
+        rot: Math.random() * Math.PI,
+        alpha: 0.04 + Math.random() * 0.06,
+        color: c,
+        speed: 0.01,
+      });
+    }
+    return n;
+  }
+
   draw(ctx, camX, camY, zoom, w, h) {
+    this._t += 0.016;
+
+    // ── Nebula clouds (very subtle) ───────────────────────────────────
+    for (const nb of this.nebulae) {
+      const px = ((nb.x + camX * nb.speed / 10000) % 1 + 1) % 1;
+      const py = ((nb.y + camY * nb.speed / 10000) % 1 + 1) % 1;
+      const sx = px * w, sy = py * h;
+      const rw = nb.rx * w, rh = nb.ry * h;
+
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(nb.rot);
+      const [r2, g2, b2] = nb.color;
+      const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, rw);
+      grad.addColorStop(0, `rgba(${r2},${g2},${b2},${nb.alpha})`);
+      grad.addColorStop(1, `rgba(${r2},${g2},${b2},0)`);
+      ctx.fillStyle = grad;
+      ctx.scale(1, rh / rw);
+      ctx.beginPath();
+      ctx.arc(0, 0, rw, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // ── Stars ─────────────────────────────────────────────────────────
     for (const layer of this.layers) {
       for (const s of layer.stars) {
-        // Parallax: stars wrap around and move slowly with camera
         const px = ((s.x + camX * layer.speed / 10000) % 1 + 1) % 1;
         const py = ((s.y + camY * layer.speed / 10000) % 1 + 1) % 1;
-        const sx = px * w;
-        const sy = py * h;
-        ctx.fillStyle = `rgba(255,255,255,${s.b})`;
+        const sx = px * w, sy = py * h;
+
+        let alpha = s.b;
+        if (s.twinkle) {
+          alpha *= 0.5 + 0.5 * Math.sin(this._t * s.speed + s.phase);
+        }
+
+        const [r2, g2, b2] = s.tint;
+
+        // Glow for brighter stars
+        if (s.r > 1.2) {
+          ctx.globalAlpha = alpha * 0.3;
+          const grd = ctx.createRadialGradient(sx, sy, 0, sx, sy, s.r * 3);
+          grd.addColorStop(0, `rgba(${r2},${g2},${b2},1)`);
+          grd.addColorStop(1, `rgba(${r2},${g2},${b2},0)`);
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(sx, sy, s.r * 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = `rgb(${r2},${g2},${b2})`;
         ctx.beginPath();
         ctx.arc(sx, sy, s.r, 0, Math.PI * 2);
         ctx.fill();
       }
     }
+    ctx.globalAlpha = 1;
   }
 }

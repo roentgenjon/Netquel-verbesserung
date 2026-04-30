@@ -604,8 +604,12 @@ class Game {
     const w = this.gameCanvas.width;
     const h = this.gameCanvas.height;
 
-    // Clear
-    ctx.fillStyle = '#000005';
+    // Deep space background gradient
+    const bgGrad = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, Math.max(w, h) * 0.8);
+    bgGrad.addColorStop(0,   '#04060f');
+    bgGrad.addColorStop(0.5, '#020408');
+    bgGrad.addColorStop(1,   '#000002');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
     // Stars (before camera transform, screen-space parallax)
