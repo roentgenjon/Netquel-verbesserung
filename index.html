@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Netquel</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- MAIN MENU -->
+<div id="menu-screen" class="screen active">
+  <div class="menu-bg"></div>
+  <div class="menu-content">
+    <h1 class="logo">NETQUEL</h1>
+    <p class="tagline">Build. Fly. Conquer.</p>
+    <div class="menu-buttons">
+      <button id="btn-play" class="btn-primary">Spielen</button>
+      <button id="btn-editor" class="btn-secondary">Schiff bauen</button>
+      <button id="btn-controls" class="btn-secondary">Steuerung</button>
+    </div>
+    <div class="menu-version">v1.0 — GitHub Pages Edition</div>
+  </div>
+</div>
+
+<!-- CONTROLS SCREEN -->
+<div id="controls-screen" class="screen">
+  <div class="menu-bg"></div>
+  <div class="menu-content">
+    <h2>Steuerung</h2>
+    <div class="controls-grid">
+      <div class="controls-section">
+        <h3>Flug</h3>
+        <table class="controls-table">
+          <tr><td class="key">W</td><td>Vorwärts</td></tr>
+          <tr><td class="key">S</td><td>Rückwärts</td></tr>
+          <tr><td class="key">A</td><td>Links drehen</td></tr>
+          <tr><td class="key">D</td><td>Rechts drehen</td></tr>
+          <tr><td class="key">E</td><td>Speeden (Boost)</td></tr>
+          <tr><td class="key">↑↓←→</td><td>Alternativ: Fliegen</td></tr>
+          <tr><td class="key">Maus</td><td>Zielen &amp; Drehen</td></tr>
+        </table>
+      </div>
+      <div class="controls-section">
+        <h3>Kampf &amp; Sonstiges</h3>
+        <table class="controls-table">
+          <tr><td class="key">Leertaste</td><td>Laser / Bohrer aktivieren</td></tr>
+          <tr><td class="key">LMB</td><td>Schießen (Maus)</td></tr>
+          <tr><td class="key">T</td><td>Chat öffnen</td></tr>
+          <tr><td class="key">Tab</td><td>Spielerliste</td></tr>
+          <tr><td class="key">Esc</td><td>Menü / Abbrechen</td></tr>
+          <tr><td class="key">R</td><td>Respawn</td></tr>
+        </table>
+      </div>
+      <div class="controls-section">
+        <h3>Editor</h3>
+        <table class="controls-table">
+          <tr><td class="key">LMB</td><td>Block platzieren</td></tr>
+          <tr><td class="key">RMB</td><td>Block entfernen</td></tr>
+          <tr><td class="key">Scroll</td><td>Zoom</td></tr>
+          <tr><td class="key">Mittelmaus</td><td>Kamera bewegen</td></tr>
+          <tr><td class="key">1-9</td><td>Block-Typ wählen</td></tr>
+          <tr><td class="key">G</td><td>Gitter ein/aus</td></tr>
+        </table>
+      </div>
+    </div>
+    <button id="btn-back-controls" class="btn-secondary">Zurück</button>
+  </div>
+</div>
+
+<!-- SHIP EDITOR -->
+<div id="editor-screen" class="screen">
+  <canvas id="editor-canvas"></canvas>
+  <div id="editor-ui">
+    <div id="block-palette">
+      <h3>Blöcke</h3>
+      <div id="block-list"></div>
+    </div>
+    <div id="editor-toolbar">
+      <button id="btn-editor-play" title="Ins Spiel (F5)">▶ Spielen</button>
+      <button id="btn-editor-clear" title="Alles löschen">🗑 Löschen</button>
+      <button id="btn-editor-save" title="Speichern">💾 Speichern</button>
+      <button id="btn-editor-load" title="Laden">📂 Laden</button>
+      <button id="btn-editor-menu" title="Menü">✕ Menü</button>
+      <span id="editor-grid-info">Kein Limit</span>
+    </div>
+    <div id="editor-status">
+      <span id="editor-block-count">Blöcke: 0</span>
+      <span id="editor-coords">X: 0, Y: 0</span>
+    </div>
+  </div>
+</div>
+
+<!-- GAME -->
+<div id="game-screen" class="screen">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="hud-left">
+      <div class="hud-bar-group">
+        <label>HP</label>
+        <div class="hud-bar"><div id="bar-hp" class="bar-fill hp"></div></div>
+        <span id="val-hp">100</span>
+      </div>
+      <div class="hud-bar-group">
+        <label>Energie</label>
+        <div class="hud-bar"><div id="bar-energy" class="bar-fill energy"></div></div>
+        <span id="val-energy">100</span>
+      </div>
+      <div class="hud-bar-group">
+        <label>Schub</label>
+        <div class="hud-bar"><div id="bar-boost" class="bar-fill boost"></div></div>
+        <span id="val-boost">100</span>
+      </div>
+    </div>
+    <div id="hud-top">
+      <span id="hud-score">Punkte: 0</span>
+      <span id="hud-kills">Kills: 0</span>
+      <span id="hud-speed">0 m/s</span>
+    </div>
+    <div id="hud-right">
+      <div id="minimap-container">
+        <canvas id="minimap"></canvas>
+        <span>Karte</span>
+      </div>
+    </div>
+    <div id="hud-crosshair"></div>
+  </div>
+
+  <!-- CHAT -->
+  <div id="chat-container">
+    <div id="chat-messages"></div>
+    <div id="chat-input-row" class="hidden">
+      <input id="chat-input" type="text" maxlength="120" placeholder="Nachricht eingeben... (Enter senden, Esc abbrechen)">
+    </div>
+  </div>
+
+  <!-- PLAYER LIST (Tab) -->
+  <div id="player-list" class="hidden">
+    <h3>Spieler</h3>
+    <div id="player-list-content"></div>
+  </div>
+
+  <!-- DEATH SCREEN -->
+  <div id="death-screen" class="hidden">
+    <h2>Zerstört!</h2>
+    <p id="death-msg"></p>
+    <button id="btn-respawn">Respawn (R)</button>
+    <button id="btn-death-menu">Menü</button>
+  </div>
+
+  <!-- PAUSE MENU -->
+  <div id="pause-menu" class="hidden">
+    <h2>Pause</h2>
+    <button id="btn-resume">Weiter (Esc)</button>
+    <button id="btn-pause-editor">Editor</button>
+    <button id="btn-pause-menu">Hauptmenü</button>
+  </div>
+
+  <button id="btn-game-menu" class="hud-btn">☰</button>
+</div>
+
+<script src="js/blocks.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/weapons.js"></script>
+<script src="js/camera.js"></script>
+<script src="js/input.js"></script>
+<script src="js/ship.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
