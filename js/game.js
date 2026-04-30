@@ -357,11 +357,10 @@ class Game {
   _update(dt) {
     if (!this.player) return;
 
-    // Update mouse world position for aiming
+    // Update mouse world position (only for UI, not for ship rotation)
     const worldMouse = this.camera.screenToWorld(this.input.mouse.x, this.input.mouse.y);
     this.input.mouse.worldX = worldMouse.x;
     this.input.mouse.worldY = worldMouse.y;
-    this.input._mouseAiming = true;
 
     // Player controls
     if (this.player.alive) {

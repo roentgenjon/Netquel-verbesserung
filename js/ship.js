@@ -71,7 +71,7 @@ class Ship {
 
     this.body.mass = Math.max(1, totalMass);
     this.body.drag = 0.995;
-    this.body.angularDrag = 0.94;
+    this.body.angularDrag = 0.88;
 
     // Moment of inertia
     let inertia = 0;
@@ -148,8 +148,8 @@ class Ship {
       energyCost += 1.5;
     }
 
-    if (input.rotateLeft) torque -= 60000;
-    if (input.rotateRight) torque += 60000;
+    if (input.rotateLeft) torque -= 90000;
+    if (input.rotateRight) torque += 90000;
 
     // Boost (E key)
     this.isBoosting = false;
@@ -170,18 +170,6 @@ class Ship {
       this.energy -= energyCost * dt;
     } else if (energyCost === 0) {
       if (torque !== 0) this.body.applyTorque(torque * dt);
-    }
-
-    // Mouse aiming — rotate toward mouse world position
-    if (input._mouseAiming && !input.rotateLeft && !input.rotateRight) {
-      const dx = input.mouse.worldX - this.body.pos.x;
-      const dy = input.mouse.worldY - this.body.pos.y;
-      const targetAngle = Math.atan2(dy, dx);
-      const diff = angleDiff(this.body.angle, targetAngle);
-      const rotSpeed = 3.5;
-      if (Math.abs(diff) > 0.02) {
-        this.body.angularVel += Math.sign(diff) * rotSpeed * dt;
-      }
     }
   }
 
