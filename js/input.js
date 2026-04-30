@@ -27,6 +27,10 @@ class InputHandler {
   }
 
   _onKeyDown(e) {
+    // Prevent browser scroll on Space, Arrow keys, Tab
+    if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.code)) {
+      e.preventDefault();
+    }
     if (this.chatMode) return;
     this.keys[e.code] = true;
     this.keys[e.key] = true;
